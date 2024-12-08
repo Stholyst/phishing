@@ -1,20 +1,28 @@
 import streamlit as st
 import numpy as np
+import pickle  # Import pickle to load the tokenizer
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 # Load pre-trained GRU model
 model_gru = load_model('gru_model.h5')
 
-# Define the tokenizer and max sequence length (adjust these values to match your trained model)
-# Replace with the actual tokenizer and sequence length used during training
-tokenizer = None  # Load your tokenizer here (e.g., via pickle or joblib)
-max_sequence_length = 100  # Replace with the correct value
+# Load the saved tokenizer
+try:
+    with open('tokenizer.pkl', 'rb') as f:
+        tokenizer = pickle.load(f)
+        print("Tokenizer loaded successfully.")
+except Exception as e:
+    st.error(f"Failed to load tokenizer: {e}")
+    tokenizer = None
+
+# Set max sequence length (ensure this matches the value used during training)
+max_sequence_length = 100
 
 # Define a function for preprocessing the input URL
 def preprocess_url(url):
     if tokenizer is None:
-        st.error("Tokenizer is not loaded. Please load the tokenizer correctly.")
+        st.error("Tokenizer is not loaded. Please check the tokenizer file.")
         return None
     sequences = tokenizer.texts_to_sequences([url])
     return pad_sequences(sequences, maxlen=max_sequence_length)
@@ -41,9 +49,10 @@ if st.button("Check URL"):
     else:
         try:
             confidence, result = predict_url(test_url)
-            st.write(f"### Prediction: {result}")
-            st.write(f"Confidence: {confidence:.2f}")
+            if confidence is None:
+                st.error("Prediction could not be made. Ensure tokenizer is loaded properly.")
+            else:
+                st.write(f"### Prediction: {result}")
+                st.write(f"Confidence: {confidence:.2f}")
         except Exception as e:
             st.error(f"An error occurred: {e}")
-
-st.write("\n**Note:** Ensure the tokenizer and the model are correctly loaded for this app to work.")

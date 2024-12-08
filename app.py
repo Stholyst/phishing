@@ -4,6 +4,7 @@ import pickle  # Import pickle to load the tokenizer
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
+
 # Load pre-trained GRU model
 try:
     model_gru = load_model('gru_model.keras')
@@ -24,25 +25,37 @@ except Exception as e:
 # Set max sequence length (ensure this matches the value used during training)
 max_sequence_length = 100
 
+
 # Define a function for preprocessing the input URL
 def preprocess_url(url):
     if tokenizer is None:
-        st.error("Tokenizer is not loaded. Please check the tokenizer file.")
+        st.error("Tokenizer isn't loaded. Ensure the tokenizer is available.")
         return None
     sequences = tokenizer.texts_to_sequences([url])
     return pad_sequences(sequences, maxlen=max_sequence_length)
 
+
 # Define a function for making predictions
 def predict_url(url):
     if model_gru is None:
-        st.error("Model is not loaded. Please ensure the model file is available.")
+        st.error("Model isn't loaded. Prediction cannot proceed.")
         return None
+
+    if tokenizer is None:
+        st.error("Tokenizer isn't loaded. Prediction cannot proceed.")
+        return None
+
     processed_url = preprocess_url(url)
     if processed_url is None:
         return None
-    prediction = model_gru.predict(processed_url)
-    confidence = prediction[0][0]
-    return confidence, "Phishing" if confidence > 0.5 else "Not Phishing"
+    try:
+        prediction = model_gru.predict(processed_url)
+        confidence = prediction[0][0]
+        return confidence, "Phishing" if confidence > 0.5 else "Not Phishing"
+    except Exception as e:
+        st.error(f"Error during prediction: {e}")
+        return None
+
 
 # Streamlit App Interface
 st.title("Real-Time Phishing URL Detection")
@@ -56,11 +69,12 @@ if st.button("Check URL"):
         st.warning("Please enter a URL to check.")
     else:
         try:
-            confidence, result = predict_url(test_url)
-            if confidence is None:
-                st.error("Prediction could not be made. Ensure tokenizer and model are loaded properly.")
+            result = predict_url(test_url)
+            if result is None:
+                st.error("Could not make a prediction. Ensure all components are loaded properly.")
             else:
-                st.write(f"### Prediction: {result}")
+                confidence, prediction_result = result
+                st.write(f"### Prediction: {prediction_result}")
                 st.write(f"Confidence: {confidence:.2f}")
         except Exception as e:
             st.error(f"An error occurred: {e}")

@@ -5,13 +5,18 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 # Load pre-trained GRU model
-model_gru = load_model('gru_model.h5')
+try:
+    model_gru = load_model('gru_model')  # Changed to SavedModel format
+    st.success("Model loaded successfully.")
+except Exception as e:
+    st.error(f"Failed to load model: {e}")
+    model_gru = None
 
 # Load the saved tokenizer
 try:
     with open('tokenizer.pkl', 'rb') as f:
         tokenizer = pickle.load(f)
-        print("Tokenizer loaded successfully.")
+        st.success("Tokenizer loaded successfully.")
 except Exception as e:
     st.error(f"Failed to load tokenizer: {e}")
     tokenizer = None
@@ -29,6 +34,9 @@ def preprocess_url(url):
 
 # Define a function for making predictions
 def predict_url(url):
+    if model_gru is None:
+        st.error("Model is not loaded. Please ensure the model file is available.")
+        return None
     processed_url = preprocess_url(url)
     if processed_url is None:
         return None
@@ -50,7 +58,7 @@ if st.button("Check URL"):
         try:
             confidence, result = predict_url(test_url)
             if confidence is None:
-                st.error("Prediction could not be made. Ensure tokenizer is loaded properly.")
+                st.error("Prediction could not be made. Ensure tokenizer and model are loaded properly.")
             else:
                 st.write(f"### Prediction: {result}")
                 st.write(f"Confidence: {confidence:.2f}")

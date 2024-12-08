@@ -6,7 +6,7 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 # Load pre-trained GRU model
 try:
-    model_gru = load_model('gru_model')  # Changed to SavedModel format
+    model_gru = load_model('gru_model.keras')
     st.success("Model loaded successfully.")
 except Exception as e:
     st.error(f"Failed to load model: {e}")

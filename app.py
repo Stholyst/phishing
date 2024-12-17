@@ -3,7 +3,7 @@ import numpy as np
 import pickle  # Import pickle to load the tokenizer
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-
+from tensorflow.keras.preprocessing.text import Tokenizer
 
 # Load pre-trained GRU model
 try:
@@ -17,7 +17,12 @@ except Exception as e:
 try:
     with open('tokenizer.pkl', 'rb') as f:
         tokenizer = pickle.load(f)
-        st.success("Tokenizer loaded successfully.")
+        # Verify the tokenizer object
+        if isinstance(tokenizer, Tokenizer):
+            st.success("Tokenizer loaded successfully and is valid.")
+        else:
+            st.error("Invalid tokenizer object loaded.")
+            tokenizer = None
 except Exception as e:
     st.error(f"Failed to load tokenizer: {e}")
     tokenizer = None
@@ -31,8 +36,13 @@ def preprocess_url(url):
     if tokenizer is None:
         st.error("Tokenizer isn't loaded. Ensure the tokenizer is available.")
         return None
-    sequences = tokenizer.texts_to_sequences([url])
-    return pad_sequences(sequences, maxlen=max_sequence_length)
+    try:
+        sequences = tokenizer.texts_to_sequences([url])
+        st.write(f"Tokenized Sequences: {sequences}")
+        return pad_sequences(sequences, maxlen=max_sequence_length)
+    except Exception as e:
+        st.error(f"Error in preprocessing: {e}")
+        return None
 
 
 # Define a function for making predictions

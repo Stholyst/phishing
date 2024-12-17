@@ -6,66 +6,26 @@ from tensorflow.keras.preprocessing.sequence import pad_sequences
 from tensorflow.keras.preprocessing.text import Tokenizer
 
 # Load pre-trained GRU model
-try:
-    model_gru = load_model('gru_model.keras')
-    st.success("Model loaded successfully.")
-except Exception as e:
-    st.error(f"Failed to load model: {e}")
-    model_gru = None
+model_gru = load_model('gru_model.keras')
 
 # Load the saved tokenizer
-try:
-    with open('tokenizer.pkl', 'rb') as f:
-        tokenizer = pickle.load(f)
-        # Verify the tokenizer object
-        if isinstance(tokenizer, Tokenizer):
-            st.success("Tokenizer loaded successfully and is valid.")
-        else:
-            st.error("Invalid tokenizer object loaded.")
-            tokenizer = None
-except Exception as e:
-    st.error(f"Failed to load tokenizer: {e}")
-    tokenizer = None
+with open('tokenizer.pkl', 'rb') as f:
+    tokenizer = pickle.load(f)
 
 # Set max sequence length (ensure this matches the value used during training)
 max_sequence_length = 100
 
-
 # Define a function for preprocessing the input URL
 def preprocess_url(url):
-    if tokenizer is None:
-        st.error("Tokenizer isn't loaded. Ensure the tokenizer is available.")
-        return None
-    try:
-        sequences = tokenizer.texts_to_sequences([url])
-        st.write(f"Tokenized Sequences: {sequences}")
-        return pad_sequences(sequences, maxlen=max_sequence_length)
-    except Exception as e:
-        st.error(f"Error in preprocessing: {e}")
-        return None
-
+    sequences = tokenizer.texts_to_sequences([url])
+    return pad_sequences(sequences, maxlen=max_sequence_length)
 
 # Define a function for making predictions
 def predict_url(url):
-    if model_gru is None:
-        st.error("Model isn't loaded. Prediction cannot proceed.")
-        return None
-
-    if tokenizer is None:
-        st.error("Tokenizer isn't loaded. Prediction cannot proceed.")
-        return None
-
     processed_url = preprocess_url(url)
-    if processed_url is None:
-        return None
-    try:
-        prediction = model_gru.predict(processed_url)
-        confidence = prediction[0][0]
-        return confidence, "Phishing" if confidence > 0.5 else "Not Phishing"
-    except Exception as e:
-        st.error(f"Error during prediction: {e}")
-        return None
-
+    prediction = model_gru.predict(processed_url)
+    confidence = prediction[0][0]
+    return confidence, "Phishing" if confidence > 0.5 else "Not Phishing"
 
 # Streamlit App Interface
 st.title("Real-Time Phishing URL Detection")
@@ -78,13 +38,7 @@ if st.button("Check URL"):
     if not test_url:
         st.warning("Please enter a URL to check.")
     else:
-        try:
-            result = predict_url(test_url)
-            if result is None:
-                st.error("Could not make a prediction. Ensure all components are loaded properly.")
-            else:
-                confidence, prediction_result = result
-                st.write(f"### Prediction: {prediction_result}")
-                st.write(f"Confidence: {confidence:.2f}")
-        except Exception as e:
-            st.error(f"An error occurred: {e}")
+        result = predict_url(test_url)
+        confidence, prediction_result = result
+        st.write(f"### Prediction: {prediction_result}")
+        st.write(f"Confidence: {confidence:.2f}")

@@ -3,7 +3,6 @@ import numpy as np
 import pickle  # Import pickle to load the tokenizer
 from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.preprocessing.text import Tokenizer
 
 # Load pre-trained GRU model
 model_gru = load_model('gru_model.keras', compile=False)
@@ -24,8 +23,7 @@ def preprocess_url(url):
 def predict_url(url):
     processed_url = preprocess_url(url)
     prediction = model_gru.predict(processed_url)
-    confidence = prediction[0][0]
-    return confidence, "Phishing" if confidence > 0.5 else "Not Phishing"
+    return "Phishing" if prediction[0][0] > 0.5 else "Not Phishing"
 
 # Streamlit App Interface
 st.title("Real-Time Phishing URL Detection")
@@ -38,7 +36,5 @@ if st.button("Check URL"):
     if not test_url:
         st.warning("Please enter a URL to check.")
     else:
-        result = predict_url(test_url)
-        confidence, prediction_result = result
+        prediction_result = predict_url(test_url)
         st.write(f"### Prediction: {prediction_result}")
-        st.write(f"Confidence: {confidence:.2f}")

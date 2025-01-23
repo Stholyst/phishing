@@ -5,7 +5,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 # Load pre-trained GRU model
-model_gru = load_model('lstm_model.keras', compile=False)
+model_lstm = load_model('lstm_model.keras', compile=False)
 
 # Load the saved tokenizer
 with open('tokenizer.pkl', 'rb') as f:
@@ -22,7 +22,7 @@ def preprocess_url(url):
 # Define a function for making predictions
 def predict_url(url):
     processed_url = preprocess_url(url)
-    prediction = model_gru.predict(processed_url)
+    prediction = model_lstm.predict(processed_url)
     return "Legitimate" if prediction[0][0] > 0.5 else "Phishing"
 
 # Streamlit App Interface

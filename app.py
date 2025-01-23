@@ -23,7 +23,7 @@ def preprocess_url(url):
 def predict_url(url):
     processed_url = preprocess_url(url)
     prediction = model_gru.predict(processed_url)
-    return "Phishing" if prediction[0][0] > 0.5 else "Not Phishing"
+    return "Legitimate" if prediction[0][0] > 0.5 else "Phishing"
 
 # Streamlit App Interface
 st.title("Real-Time Phishing URL Detection")

@@ -5,7 +5,7 @@ from tensorflow.keras.models import load_model
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 # Load pre-trained GRU model
-model_gru = load_model('gru_model.keras', compile=False)
+model_gru = load_model('lstm_model.keras', compile=False)
 
 # Load the saved tokenizer
 with open('tokenizer.pkl', 'rb') as f:

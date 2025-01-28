@@ -27,7 +27,7 @@ def predict_url(url):
 
 # Streamlit App Interface
 st.title("Real-Time Phishing URL Detection")
-st.write("Enter a URL below to check if it is phishing or not using the LSTM model.")
+st.write("Enter a URL below to check if it is phishing or Legitimate using the LSTM model.")
 
 # Input URL
 test_url = st.text_input("Enter a URL:", "")
